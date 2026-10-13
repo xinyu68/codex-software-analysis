@@ -1,0 +1,27 @@
+{
+  "name": "codex-software-analysis",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "通用本地软件分析工作台：REA、分析项目、证据与报告",
+  "author": { "name": "xinyu68", "email": "1693784423@qq.com" },
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/xinyu68/codex-software-analysis.git" },
+  "engines": { "node": "^22.19.0 || ^24.11.0 || >=26.0.0" },
+  "scripts": {
+    "mcp": "node mcp/server.mjs",
+    "status": "node scripts/cli.mjs status",
+    "setup": "node scripts/runtime.mjs setup",
+    "env:prepare": "node scripts/prepare-environment.mjs",
+    "test": "node --test test/*.test.mjs",
+    "verify": "node scripts/verify.mjs",
+    "verify:web": "node scripts/verify-web.mjs",
+    "verify:android": "node scripts/verify-android.mjs",
+    "check": "node scripts/check-package.mjs",
+    "package": "node scripts/package.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "ajv": "8.20.0"
+  }
+}

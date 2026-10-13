@@ -1,0 +1,25 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "codex-software-analysis",
+  "version": "0.2.0",
+  "description": "使用 REA 和本地工具分析软件，管理独立项目、证据、验证状态与报告。",
+  "author": { "name": "xinyu68", "email": "1693784423@qq.com" },
+  "license": "MIT",
+  "keywords": ["software-analysis", "rea", "android", "electron", "dotnet", "mcp"],
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/setup/SKILL.md",
+      "interface": {
+        "displayName": "软件分析工作台",
+        "shortDescription": "本地软件分析、证据整理与报告",
+        "longDescription": "复用 REA，按需准备本地环境，分析软件和网站，保存网络与代码证据、认证机制及报告，并回收本次任务资源。",
+        "developerName": "xinyu68",
+        "category": "Productivity",
+        "logo": "./assets/icon.svg",
+        "composerIcon": "./assets/icon.svg",
+        "capabilities": ["Read", "Write"],
+        "defaultPrompt": "分析我提供的软件，说明实现方式并给出可核对的证据。"
+      }
+    }
+  }
+}

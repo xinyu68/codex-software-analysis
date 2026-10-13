@@ -1,0 +1,8 @@
+{
+  "reaRoot": "C:/Users/your-name/AppData/Roaming/npm/node_modules/rea-agents",
+  "workspaceRoot": "D:/analysis-workspace",
+  "androidSdkRoot": "C:/Users/your-name/AppData/Local/Android/Sdk",
+  "javaHome": "D:/analysis-tools/jdk-21",
+  "jadxJar": "D:/analysis-tools/jadx-headless-mcp-0.7.1-all.jar",
+  "browserExecutable": "C:/Program Files/Google/Chrome/Application/chrome.exe"
+}
