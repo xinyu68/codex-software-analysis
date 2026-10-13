@@ -2,7 +2,7 @@
 
 一个在本机运行的 Codex 插件项目，用于分析软件文件、应用目录、网站 URL 和已有网络记录。通过 REA 复用分析引擎，通过工作台管理环境、独立项目、证据、认证机制和报告。当前版本 0.2.0。
 
-参考 `doubao-browser-bridge-tutorial` 的本地工具、MCP、Skill 和文档分层方式。这里提供两个 stdio MCP 服务，不需要常驻 HTTP 桥接服务、浏览器扩展或对外开放端口。
+这里提供两个 stdio MCP 服务，不需要常驻 HTTP 桥接服务、浏览器扩展或对外开放端口。
 
 ## 当前功能
 
@@ -136,7 +136,5 @@ mcp.json              两个 stdio MCP 的启动配置
 ## 依赖与许可
 
 本项目新代码使用 MIT 许可。REA 和其他外部分析工具保留各自许可；安装本插件不授予 IDA、Hopper、JEB 等商业工具的许可。REA 文档和能力范围见 [官方项目](https://github.com/morluto/rea)。
-
-作者：[xinyu68](https://github.com/xinyu68)，联系邮箱：1693784423@qq.com。
 
 公开仓库只包含通用工作台、文档及虚构的学习样本。不要提交本机 `config/local.json`、`.runtime/`、`.env`、分析工作目录、实际软件文件或抓包材料；`.gitignore` 和源码打包脚本已排除本机配置与运行资料。仅分析你有权研究的软件和数据，使用时遵守适用的授权、服务条款及工具许可。
