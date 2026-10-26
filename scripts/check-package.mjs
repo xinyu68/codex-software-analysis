@@ -7,6 +7,8 @@ const manifest = await readJSON(path.join(ROOT, 'plugin.json'));
 const pkg = await readJSON(path.join(ROOT, 'package.json'));
 assert.equal(manifest.name, pkg.name);
 assert.equal(manifest.version, pkg.version);
+const configSource = await readFile(path.join(ROOT, 'lib/config.mjs'), 'utf8');
+assert.ok(configSource.includes(`export const VERSION = '${pkg.version}';`), 'Runtime version must match the package manifest');
 assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
 assert.ok(manifest.extensions['com.openai'].interface.shortDescription.length <= 30);
 for (const banned of ['skills', 'mcpServers', 'apps', 'interface']) assert.ok(!(banned in manifest));

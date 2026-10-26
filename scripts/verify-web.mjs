@@ -4,13 +4,13 @@ import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { ROOT } from '../lib/config.mjs';
+import { ROOT, VERSION } from '../lib/config.mjs';
 import { startWebsiteFixture } from '../test/fixtures/website.mjs';
 
 const runRoot = path.join(ROOT, '.runtime', 'web-verification', String(Date.now()));
 await mkdir(runRoot, { recursive: true });
 const fixture = await startWebsiteFixture();
-const client = new Client({ name: 'website-verifier', version: '0.2.0' });
+const client = new Client({ name: 'website-verifier', version: VERSION });
 const verification = { verifiedAt: new Date().toISOString(), remoteBusinessCalls: false };
 try {
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(ROOT, 'mcp/server.mjs')], stderr: 'pipe',

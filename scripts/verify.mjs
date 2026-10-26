@@ -3,7 +3,8 @@ import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { ROOT, exists } from '../lib/config.mjs';
+import { ROOT, exists, VERSION } from '../lib/config.mjs';
+import { tools } from '../mcp/tools.mjs';
 import { ensureRuntime, RUNTIME_FILES } from './runtime.mjs';
 
 const runRoot = path.join(ROOT, '.runtime', 'verification', String(Date.now()));
@@ -20,11 +21,11 @@ for (const relative of [...RUNTIME_FILES, 'scripts/runtime.mjs', 'scripts/plugin
 const verification = { verifiedAt: new Date().toISOString(), realBusinessApisContacted: false };
 let client;
 try {
-  client = new Client({ name: 'software-analysis-verifier', version: '0.2.0' });
+  client = new Client({ name: 'software-analysis-verifier', version: VERSION });
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(cacheRoot, 'scripts', 'plugin-mcp.mjs')], env, stderr: 'pipe' }));
   const discovered = await client.listTools();
   verification.orchestrationTools = discovered.tools.map(tool => tool.name);
-  assert.equal(discovered.tools.length, 13);
+  assert.deepEqual(discovered.tools.map(tool => tool.name).sort(), tools.map(tool => tool.name).sort());
   const invoke = async (name, args = {}) => {
     const result = await client.callTool({ name, arguments: args }, undefined, { timeout: 120000 });
     assert.ok(!result.isError, result.content?.[0]?.text);
@@ -34,6 +35,17 @@ try {
   assert.ok(status.rea.entry, 'A local REA installation is required for the integration verifier');
   verification.reaVersion = status.rea.version;
   verification.cachedPluginWithoutNodeModules = true;
+  const localProject = await invoke('analysis_create_project', { targetPath: path.join(ROOT, 'test', 'fixtures', 'javascript-app', 'package.json'), goal: '验证无需 REA 的本地文件检查和副本回收' });
+  verification.localInspection = await invoke('analysis_inspect_local', { projectId: localProject.id });
+  const copy = await invoke('analysis_create_working_copy', { projectId: localProject.id, description: '本地样本副本' });
+  assert.equal(copy.state, 'active');
+  const plan = await invoke('analysis_cleanup_artifacts', { projectId: localProject.id });
+  verification.cleanup = await invoke('analysis_cleanup_artifacts', { projectId: localProject.id, apply: true, planId: plan.planId });
+  assert.equal(verification.cleanup.results[0].status, 'quarantined');
+  await invoke('analysis_restore_artifact', { projectId: localProject.id, artifactId: copy.id });
+  await invoke('analysis_close_project', { projectId: localProject.id });
+  verification.connections = await invoke('analysis_diagnose_connections');
+  assert.equal(verification.connections.ready, true);
   const created = await invoke('analysis_create_project', { targetPath: path.join(ROOT, 'test', 'fixtures', 'javascript-app'), goal: '检查 normalizeQuery 与 findEntries 的静态实现' });
   const run = await invoke('analysis_run_static', { projectId: created.id, profile: 'javascript', timeoutSeconds: 90 });
   assert.equal(run.status, 'completed', JSON.stringify(run));
@@ -56,7 +68,7 @@ try {
     await invoke('analysis_close_project', { projectId: project.id });
   }
   await client.close();
-  client = new Client({ name: 'rea-launcher-verifier', version: '0.2.0' });
+  client = new Client({ name: 'rea-launcher-verifier', version: VERSION });
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(cacheRoot, 'scripts', 'plugin-mcp.mjs'), 'rea'], env, stderr: 'pipe' }));
   const reaTools = await client.listTools();
   verification.reaMcpTools = reaTools.tools.map(tool => tool.name);

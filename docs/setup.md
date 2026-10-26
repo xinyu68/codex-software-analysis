@@ -60,6 +60,18 @@ node scripts/prepare-environment.mjs android --install
 
 受管工具位于运行根目录的 tools/：REA 使用固定 npm 包 6.4.0，JADX 使用 [匹配的 headless 0.7.1 发布](https://github.com/1013503897/jadx-headless-mcp/releases/tag/v0.7.1) 并校验 REA 指定的 SHA-256。独立 JDK 的自动下载目前支持 Windows x64，使用 [Temurin 官方发布](https://adoptium.net/installation/) 的 21 系列 ZIP 和发布校验值；解压前检查路径与链接条目。下载失败或摘要不匹配会报错，不执行该文件。
 
+### 0.2.1 的能力与连接诊断
+
+native 检查读取 REA providers 的真实 availability / diagnostics，而非仅检测引擎目录。缺少引擎会返回 ready=false，并保留不依赖 REA 的 localStatic 能力。provider 可用仍不代表所选格式或具体函数已经验证；检查不打开目标。
+
+analysis_diagnose_connections 通过两个独立短连接分别检查工作台与 REA，返回服务版本、工具数量、必需工具缺失项和当前源/运行/工作目录。hostToolExposure 始终是 not_verified：子进程发现正常不能证明当前聊天工具目录已刷新。工具缺失时先区分服务失败、宿主暴露和旧运行快照，按需重新 setup/reload；不要直接修改缓存。
+
+### 可恢复的受管依赖下载
+
+JADX / 独立 JDK 下载使用稳定的 .part 与元数据检查点。只有源标识、预期 SHA-256 和服务器 validator 一致时才发送 Range / If-Range；服务器返回完整 200 时重新写入，绝不把整包追加到旧片段。206 必须符合 Content-Range，最终完整 SHA-256 匹配才写入正式依赖文件。HTTPS 跳转不得降为 HTTP。
+
+默认单文件上限仍为 384 MiB、单次总时限 10 分钟；这不是新增 Ghidra 自动安装入口。失败片段保留供重试，锁在正常结束/取消时释放。进程被强制终止可能留下 .lock；需先核对该受管准备任务是否仍运行再处理，不能据 PID 文件直接终止未知进程。下载器不会自动清空运行目录或系统临时目录。
+
 选用的 Java/JADX 路径保存到本机 binding.json，并在启动子进程时传入；不会修改系统 Java/Android 环境。源码 config/local.json 的显式路径优先级更高；若人为指定了失效路径，应修正该配置。路径变更后重新执行 setup，让新快照绑定实际路径，随后重新连接 MCP。
 
 Android SDK、系统镜像、AVD、Frida、Blutter 及原生商业引擎目前提供按任务准备说明，未覆盖自动安装。具体设备步骤见 [设备准备](../skills/setup/references/android-runtime.md)。Android 静态分析不需要模拟器或镜像。

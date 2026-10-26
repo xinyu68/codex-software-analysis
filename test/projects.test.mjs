@@ -44,7 +44,9 @@ test('credential patterns are filtered; evidence corruption is rejected; reports
   const viewed = await service.projects.readEvidence(project.id, evidence.id);
   assert.ok(!viewed.text.includes('private-value'));
   assert.ok(!viewed.text.includes('private-token'));
-  await service.projects.recordFinding(project.id, { statement: '样本返回 42', level: 'live_verified', evidenceIds: [evidence.id], limitations: '仅样本验证' });
+  await service.projects.recordFinding(project.id, { statement: '样本返回 42', level: 'live_verified', evidenceIds: [evidence.id], limitations: '仅样本验证',
+    verification: { method: 'functional_test', observedBy: 'tool', subject: '学习样本', coverage: '仅本地样本', networkScope: 'not_assessed',
+      startedAt: '2026-01-01T00:00:00Z', endedAt: '2026-01-01T00:00:01Z', input: '读取样本结果', expectedOutput: '42', actualOutput: '42' } });
   const report = await service.projects.report(project.id);
   assert.match(await readFile(report.reportPath, 'utf8'), /仅样本验证/);
   await writeFile(path.join(project.directory, evidence.relativePath), 'tampered');
@@ -85,4 +87,14 @@ test('a zero-exit provider error is recorded as failure rather than a successful
   const result = await service.runStatic({ projectId: project.id, profile: 'artifact' });
   assert.equal(result.status, 'failed');
   assert.equal(result.providerErrorCode, 'backend_unavailable');
+});
+
+test('legacy reports remain readable while declaring their missing verification scope', async t => {
+  const { target, service } = await workspace(t);
+  const project = await service.projects.create(target, 'Legacy project compatibility');
+  await service.projects.mutate(project.id, value => {
+    value.findings.push({ id: 'f_legacy', statement: 'Legacy runtime claim', level: 'live_verified', evidenceIds: [], limitations: 'Historical record' });
+  });
+  const report = await service.projects.report(project.id);
+  assert.match(await readFile(report.reportPath, 'utf8'), /未结构化记录/);
 });

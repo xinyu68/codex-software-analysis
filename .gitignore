@@ -7,3 +7,9 @@ config/local.json
 !*.example
 *.zip
 *.log
+
+# Per-machine state and analysis material must never become repository content
+binding.json
+workspace/
+analysis-workspace/
+*.tar.gz

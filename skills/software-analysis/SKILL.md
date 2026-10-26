@@ -18,7 +18,7 @@ description: 分析用户提供的软件文件、应用目录、网站 URL 或�
 - APK：`android` 静态检查与 REA Android 类、方法和引用工具。Flutter 主逻辑通常在 Dart AOT/native 库中，Java 小组件或壳的分析结果不能替代首页业务逻辑。仅在需要时读取 [Android / Flutter](references/android-flutter.md)。
 - JavaScript / Electron：`javascript` 静态检查，沿模块、IPC 和导入关系追踪；不要仅因读取目录就运行其中的 npm scripts 或加载目标模块。
 - .NET：`managed` 静态元数据检查，再按需用 REA 成员、CIL、native 边界工具。
-- 原生 PE / ELF / Mach-O：先做文件/资源检查，深入函数分析复用 REA 的可用 provider。Windows 上 provider 支持与其他平台不完全相同；以当前工具及实际运行诊断为准。
+- 原生 PE / ELF / Mach-O：先用 `analysis_inspect_local` 检查选定文件；目录项目传明确的 relativePath。无需 REA 即可检查文件摘要、PE 头/导入与字符串；Windows 可读版本与嵌入证书信息，不验证证书链。深入函数分析复用 REA 的可用 provider。native 环境的 ready=false 不妨碍 localStatic；不要为基础问题直接下载大型引擎。
 - 已有 HAR：`har` 只分析记录，不访问其中的 URL。网页/设备/进程的实际运行观察使用 REA 当前暴露的工具，按当前任务选择；仅在需要时读取 [运行与接口验证](references/runtime.md)。
 
 涉及 token、签名、刷新或验证码时，读取 [认证机制](references/auth.md)，用 `analysis_record_auth` 记录来源、有效期、续期方式和实际验证范围；不在报告或 Skill 中保存凭据值。
@@ -38,11 +38,17 @@ description: 分析用户提供的软件文件、应用目录、网站 URL 或�
 
 “找到了接口”“恢复了请求结构”“实际取得预期响应”是不同结论；不要用成功建立连接来代替业务响应验证。报告工具要求运行材料，并不自动判断材料足以证明某个结论。解析错误、超时、工具不支持要保留为限制，不伪装成成功结果。
 
+新 live_verified 记录还必须提供 verification：方法、观察者、对象、时间窗口、覆盖范围与网络证据范围；functional_test 另需输入、预期和实际输出。用户确认界面显示某状态时，使用 observed + user_report，不能据此声明全部功能已验证。旧记录缺失范围时保留未知，详见 [项目工作流](../../docs/workflow.md#结构化验证范围)。
+
+观察已运行的 Windows 进程时可用 `analysis_snapshot_process`，显式选择 PID 和对应项目文件。它只有有界资源/连接表采样，不启动目标，不读取个人剪贴板、截图或完整内存。没有观察到连接不证明从未联网或不会上报；连接快照、抓包窗口和隔离测试不能互相替代。
+
 目标文件摘要改变时创建新项目；目录不计算递归内容摘要，比较前后版本时另外保存版本与文件证据。
 
 ## 结束任务
 
 用 `analysis_report` 生成本地报告，随后调用 `analysis_close_project`。另行通过 REA 或其他工具打开的会话、目标与模拟器，由其原所有者关闭。
+
+需要实验副本时使用 `analysis_create_working_copy`，在当前项目内创建并登记。外部辅助产物只能登记引用，不能自动获得清理权限。收尾用 `analysis_cleanup_artifacts` 先预览，再用匹配的 planId 和 apply=true 将自有副本移到项目回收目录；可用 `analysis_restore_artifact` 恢复。关闭项目不自动清理，回收不等于永久删除。不得按进程名或旧 PID 关闭用户原有程序；副本也不等于网络隔离。
 
 工作台网站采集拥有的 REA 会话和临时浏览器/本地入口会在完成、失败或取消时回收；关闭项目也会取消本工作台正在进行的观察。独立 rea_analysis 或其他工具启动的设备、进程仍需由其原所有者关闭。MCP/CLI 退出会回收本服务的活动任务。
 

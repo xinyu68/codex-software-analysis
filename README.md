@@ -1,6 +1,8 @@
 # 软件分析工作台
 
-一个在本机运行的 Codex 插件项目，用于分析软件文件、应用目录、网站 URL 和已有网络记录。通过 REA 复用分析引擎，通过工作台管理环境、独立项目、证据、认证机制和报告。当前版本 0.2.0。
+一个在本机运行的 Codex 插件项目，用于分析软件文件、应用目录、网站 URL 和已有网络记录。通过 REA 复用分析引擎，通过工作台管理环境、独立项目、证据、认证机制和报告。当前版本 0.2.1。
+
+更新内容见 [CHANGELOG](CHANGELOG.md)。
 
 这里提供两个 stdio MCP 服务，不需要常驻 HTTP 桥接服务、浏览器扩展或对外开放端口。
 
@@ -29,8 +31,8 @@ REA 6.4.0 支持 Node.js 22.19+（22 系列）、24.11+（24 系列）或 26+。
 git clone https://github.com/xinyu68/codex-software-analysis.git
 Set-Location .\codex-software-analysis
 npm.cmd ci --ignore-scripts
-npm.cmd run setup
 node scripts/prepare-environment.mjs basic --install
+npm.cmd run setup
 ```
 
 优先复用已经安装的兼容工具。按当前目标准备：
@@ -41,6 +43,10 @@ node scripts/prepare-environment.mjs android --install
 ```
 
 `setup` 准备插件运行依赖；`prepare-environment` 默认检查并返回计划，`--install` 才准备缺失的受管工具。REA 固定 6.4.0，JADX 使用它指定的 headless 0.7.1 JAR 并核验 SHA-256；JDK 优先复用完整模块化版本，必要时在 Windows x64 准备独立 Temurin 21。不会修改系统 Java/Android 环境或启动模拟器。Node、浏览器、SDK 和镜像仍需按 [环境说明](docs/setup.md) 准备。
+
+项目可放在任意本地目录。`config/local.json`、运行目录中的 `binding.json` 和缓存属于本机状态，不纳入 Git；只有特殊安装路径才需要手工配置。工具路径变化后重新运行 setup，以生成匹配的运行快照。
+
+上述命令使用 Windows PowerShell；macOS/Linux 使用 `npm` 代替 `npm.cmd`。部分进程检查和分析引擎具有平台限制，具体以环境诊断为准。
 
 ## 安装为本地 Codex 插件
 
@@ -86,8 +92,19 @@ codex plugin add codex-software-analysis@local-software-analysis
 | `analysis_prepare_environment` | 返回准备计划；install=true 时准备所选受管工具 |
 | `analysis_capture_website` | 有时限地访问网站，保存网络与页面证据、导出脚本并回收资源 |
 | `analysis_record_auth` | 记录认证机制、来源、期限、续期及验证范围 |
+| `analysis_inspect_local` | 无需 REA 的文件摘要、PE 头与导入、签名存在性、字符串及 Windows 版本检查 |
+| `analysis_snapshot_process` | 明确选定 Windows PID 的有界资源与连接表快照；不启动目标 |
+| `analysis_create_working_copy` | 创建有所有权记录和摘要的项目内实验副本 |
+| `analysis_register_artifact` | 登记外部辅助产物供人工收尾；不会授予自动清理权限 |
+| `analysis_cleanup_artifacts` | 先预览，再持匹配 planId 将自有产物移入项目回收目录 |
+| `analysis_restore_artifact` | 恢复未改变的回收产物，拒绝路径冲突 |
+| `analysis_diagnose_connections` | 检查两个本地 MCP 的初始化、工具发现与版本；不代表聊天已加载工具 |
 
 REA 工具列表以实际 MCP 发现结果为准。命令行备用方式、profile 与字段说明见 [工作流说明](docs/workflow.md)。
+
+0.2.1 的 `native` 环境检查会读取 REA 的实际 provider 诊断；缺少深度引擎时 `ready=false`，但 `capabilities.localStatic.available=true`，可继续基础只读检查。文件导入、字符串、证书表存在性均不能单独证明执行行为或证书可信性。
+
+新登记的 `live_verified` 结论必须有结构化 `verification`，记录观察者、方法、对象、时间窗口、覆盖范围和网络证据范围；功能测试另需输入、预期与实际输出。旧报告仍可读取，并显示缺失的验证范围。参见 [0.2.1 工作流](docs/workflow.md#本地基础检查与运行快照)。
 
 ## 工作目录与资料
 

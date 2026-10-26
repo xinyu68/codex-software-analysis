@@ -7,6 +7,10 @@ description: 按分析路线检查和准备本地依赖，修复 REA MCP 连接�
 
 `analysis_status` 只查看配置和本工作台的活动任务。实际准备使用某条路线时，调用 `analysis_check_environment`，profile 选择 basic、web、android、android-runtime、flutter 或 native。它检查 MCP 工具、Java 模块等；不打开目标，不启动 adb 服务。不把依赖存在当成目标分析成功。
 
+工具缺失或连接异常时先用 `analysis_diagnose_connections`，分别检查工作台和 REA 的服务初始化、工具发现与版本。它不能验证当前聊天的工具暴露；必要时重新加载插件或开启新聊天。CLI 备用请求使用 UTF-8 JSON 文件和 `--request`，避免 PowerShell 内联 JSON 引号、编码和扩展对象序列化问题。
+
+native 路线会读取真实 provider 诊断；没有深度引擎时 ready=false，但 localStatic 仍可用。按实际问题先使用不依赖 REA 的 `analysis_inspect_local`，需要函数级分析时再准备兼容引擎，不把存在一个引擎目录当成可用。
+
 工具尚未加载时，已准备源目录依赖的情况下可以运行 `node scripts/cli.mjs status`。首次设置入口是 `node scripts/runtime.mjs setup`，它只依赖 Node 内置模块，不要求缓存目录含 node_modules。入口目录从当前 MCP 配置确定，不使用某次案例目录作为全局默认路径。
 
 首次设置运行 `node scripts/runtime.mjs setup`，或源码项目中使用 `npm.cmd run setup`。它把运行代码和锁定依赖准备到稳定目录，并保存本机路径绑定；不修改插件缓存。开发源码项目需要测试时才在源目录运行 `npm.cmd ci --ignore-scripts`。

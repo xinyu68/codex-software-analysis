@@ -5,7 +5,7 @@ import { ROOT, readJSON } from '../lib/config.mjs';
 
 const pkg = await readJSON(path.join(ROOT, 'package.json'));
 const base = path.basename(ROOT);
-const files = ['package.json', 'package-lock.json', 'plugin.json', 'mcp.json', '.gitignore', '.gitattributes', 'README.md', 'LICENSE', 'config/local.example.json'];
+const files = ['package.json', 'package-lock.json', 'plugin.json', 'mcp.json', '.gitignore', '.gitattributes', 'README.md', 'CHANGELOG.md', 'LICENSE', 'config/local.example.json'];
 async function walk(relative) {
   const full = path.join(ROOT, relative);
   const info = await lstat(full);
@@ -17,7 +17,7 @@ async function walk(relative) {
     }
   } else if (info.isFile()) files.push(relative);
 }
-for (const folder of ['lib', 'mcp', 'scripts', 'skills', 'docs', 'test', 'assets', '.agents']) await walk(folder);
+for (const folder of ['lib', 'mcp', 'scripts', 'skills', 'docs', 'test', 'assets']) await walk(folder);
 for (const file of files) {
   const normalized = path.relative(ROOT, path.resolve(ROOT, file));
   if (normalized.startsWith('..') || path.isAbsolute(normalized)) throw new Error('Source file is outside the plugin');
@@ -32,4 +32,4 @@ await new Promise((resolve, reject) => {
   child.on('error', reject);
   child.on('close', code => code === 0 ? resolve() : reject(new Error(`Archive creation failed (${code})`)));
 });
-console.log(JSON.stringify({ archive, fileCount: files.length, excluded: ['node_modules', '.git', '.runtime', 'config/local.json', 'analysis workspace'] }, null, 2));
+console.log(JSON.stringify({ archive, fileCount: files.length, excluded: ['node_modules', '.git', '.agents marketplace registration', '.runtime', 'config/local.json', 'analysis workspace'] }, null, 2));

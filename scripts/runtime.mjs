@@ -8,7 +8,8 @@ import { ROOT, exists, loadConfig } from '../lib/config.mjs';
 
 export const RUNTIME_FILES = Object.freeze(['package.json', 'package-lock.json', 'lib/config.mjs', 'lib/target.mjs', 'lib/jobs.mjs', 'lib/projects.mjs', 'lib/service.mjs',
   'lib/operations.mjs', 'lib/rea-session.mjs', 'lib/environment.mjs', 'lib/web.mjs',
-  'mcp/server.mjs', 'mcp/tools.mjs', 'scripts/cli.mjs', 'scripts/rea-mcp.mjs', 'scripts/extract-zip.ps1']);
+  'lib/verification.mjs', 'lib/local-inspection.mjs', 'lib/artifacts.mjs', 'lib/connections.mjs', 'lib/downloads.mjs',
+  'mcp/server.mjs', 'mcp/tools.mjs', 'scripts/cli.mjs', 'scripts/rea-mcp.mjs', 'scripts/extract-zip.ps1', 'scripts/inspect-windows.ps1', 'scripts/snapshot-process.ps1']);
 
 export async function ensureRuntime({ env = process.env, install = false } = {}) {
   const config = await loadConfig(env);

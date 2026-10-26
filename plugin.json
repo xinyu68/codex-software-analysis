@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "codex-software-analysis",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "使用 REA 和本地工具分析软件，管理独立项目、证据、验证状态与报告。",
   "author": { "name": "xinyu68", "email": "1693784423@qq.com" },
   "license": "MIT",

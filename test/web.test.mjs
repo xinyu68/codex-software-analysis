@@ -63,8 +63,9 @@ test('large evidence pages verify integrity and credential URL values stay filte
 test('authentication findings require evidence and preserve the verified scope', async t => {
   const { target, service } = await workspace(t);
   const project = await service.projects.create(target, '解释会话');
-  const evidence = await service.projects.addEvidence(project.id, { payload: 'OAuth response observed', kind: 'runtime', description: '学习样本' });
-  await callTool(service, 'analysis_record_auth', { projectId: project.id, statement: '服务器签发会话', level: 'live_verified', evidenceIds: [evidence.id], mechanism: 'server_issued_session', tokenSource: 'server', expiresSeconds: 7200, renewal: 'refresh_token', verifiedScope: '仅授权响应，未验证行情' });
+  const evidence = await service.projects.addEvidence(project.id, { payload: 'OAuth response observed', kind: 'network_capture', description: '学习样本' });
+  await callTool(service, 'analysis_record_auth', { projectId: project.id, statement: '服务器签发会话', level: 'live_verified', evidenceIds: [evidence.id], mechanism: 'server_issued_session', tokenSource: 'server', expiresSeconds: 7200, renewal: 'refresh_token', verifiedScope: '仅授权响应，未验证行情',
+    verification: { method: 'network_capture', observedBy: 'tool', subject: '本地授权学习样本', coverage: '仅授权响应', networkScope: 'capture_window', startedAt: '2026-01-01T00:00:00Z', endedAt: '2026-01-01T00:00:01Z' } });
   const report = await service.projects.report(project.id);
   assert.match(await readFile(report.reportPath, 'utf8'), /仅授权响应，未验证行情/);
   await assert.rejects(callTool(service, 'analysis_record_auth', { projectId: project.id, statement: '伪结论', level: 'live_verified', evidenceIds: [], mechanism: 'unknown', tokenSource: 'unknown', verifiedScope: 'unknown' }), /reference evidence/);
